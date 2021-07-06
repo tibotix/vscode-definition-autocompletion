@@ -1,74 +1,219 @@
 const vscode = require('vscode');
-const {HeaderFile, is_header_file} = require("./file");
+const {FilePairFactory } = require("./file");
+const { ContainerChain } = require('./container_chain');
 
 
 var symbol_index = new Object(); // contains only declaration symbols
 
-class Symbol{
-	constructor(symbol_obj, document){
-		//console.log("symbol_obj: ");
-		//console.log(symbol_obj);
-		this.range_very_end = symbol_obj.range.end;
-		this.range_very_start = symbol_obj.range.start;
-		this.range_end = symbol_obj.selectionRange.end;
-		this.range_start = symbol_obj.selectionRange.start;
-		this.is_declaration = document.lineAt(this.range_very_end).text.trimEnd().endsWith(";");
-		this.is_deleted = document.lineAt(this.range_very_end).text.trimEnd().endsWith("delete;");
-		this.is_defaulted = document.lineAt(this.range_very_end).text.trimEnd().endsWith("default;");
-		this.insert_signature = document.lineAt(this.range_very_end).text.substring(this.range_very_start.character, this.range_very_end.character-1);
-		this.clear_signature();
-		// this.whole_signature = document.lineAt(this.range_end).text.substring(this.range_very_start.character, this.range_end.character);
-		this.kind = symbol_obj.kind;
-		this.name = symbol_obj.name;
-	}
+class SymbolFactory {
+    constructor(document){
+        this.document = document;
+    }
 
-	clear_signature(){
-		// TODO: add more attributes
-		this.insert_signature = this.insert_signature.replace(" override", "").replace("virtual ", "").replace("[[nodiscard]] ").replace("explicit ", "").replace("static ", "").replace("inline ", "");
-	}
-
-	is_symbol_with_no_definition(){
-		return (this.is_declaration && !this.is_defaulted && !this.is_deleted);
-	}
+    create_symbol_from_kind(symbol_obj, container_chain){
+        switch (symbol_obj.kind) {
+            case 11:
+                return new FunctionSymbol(symbol_obj, this.document, container_chain);
+            case 9:
+                return new EnumSymbol(symbol_obj, this.document, container_chain);
+            case 4:
+                return new ClassSymbol(symbol_obj, this.document, container_chain);
+            case 5:
+                return new MethodSymbol(symbol_obj, this.document, container_chain);
+            case 22:
+                return new StructSymbol(symbol_obj, this.document, container_chain);
+            default:
+                return new Symbol(symbol_obj, this.document, container_chain);
+        }
+    }
 };
 
 
-async function symbols_for(uri){
-	return await vscode.commands.executeCommand("vscode.executeDocumentSymbolProvider", uri);
-}
+class Symbol {
 
+    constructor(symbol_obj, document, container_chain){
+		// console.log("symbol_obj: ");
+		// console.log(symbol_obj);
+        let range_very_end = symbol_obj.range.end;
+		let range_very_start = symbol_obj.range.start;
+        
+        this.ending_line = document.lineAt(range_very_end).text;
+        // console.log(this.ending_line);
+		this.signature = this.ending_line.substring(range_very_start.character, range_very_end.character-1);
+        // console.log(this.signature);
+        this.identifier_name_start = symbol_obj.selectionRange.start.character - range_very_start.character;
+        this.container_chain = container_chain;
+        this.apply_container_chain(container_chain);
+        this.clear_attributes();
+        this.ending_line = this.ending_line.trim();
+        this.signature = this.signature.trim();
+        // console.log(this.signature);
 
-async function parse_header_symbol(symbol, flatted_symbols, document){
-	const children = symbol.children;
-	for(let i=0; i<children.length; i++){
-		if(children[i].kind == 11 || children[i].kind == 5){ // maybe operator 24 , maybe constructor 8	
-			const s = new Symbol(children[i], document);
-			if(s.is_symbol_with_no_definition()){
-				flatted_symbols.push(s);
-			}
-		}
-		await parse_header_symbol(children[i], flatted_symbols, document);
-	}
-}
-
-async function flatten_header_symbols(symbols){
-	const flatted_symbols = [];
-	// maybe use vscode.SignatureInformation
-
-	if(!vscode.window.activeTextEditor){
-		return flatted_symbols;
+		this.kind = symbol_obj.kind;
+		this.name = container_chain + symbol_obj.name;
 	}
 
-	const document = vscode.window.activeTextEditor.document;
-	await parse_header_symbol({children: symbols}, flatted_symbols, document);
-	return flatted_symbols;
+    clear_attributes(){
+        this.signature = this.signature.replace(" override", "").replace("virtual ", "").replace("[[nodiscard]] ", "").replace("explicit ", "").replace("static ", "").replace("inline ", "");
+    }
+
+    apply_container_chain(container_chain){
+        ;
+    }
+
+	is_symbol_with_no_definition(){
+        return false;
+	}
+
+    is_container(){
+        return false;
+    }
+
+    get_container_specifier(){
+        return "";
+    }
+
+    equals(other){
+        // 4 - 11
+        return (this.name == other.name);
+    }
+
+};
+
+class FunctionSymbol extends Symbol{ // without class
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+        // TODO: catch header definitions
+        this.is_declaration = this.ending_line.endsWith(";");
+		this.is_deleted = this.ending_line.endsWith("delete;");
+		this.is_defaulted = this.ending_line.endsWith("default;");
+        this.is_pure_virtual = this.ending_line.endsWith("0;");
+    }
+
+    apply_container_chain(container_chain){
+        // as this is a function we do nothing
+    }
+
+	is_symbol_with_no_definition(){
+        return (this.is_declaration && !this.is_defaulted && !this.is_deleted && !this.is_pure_virtual);
+	}
+
+};
+
+class MethodSymbol extends Symbol{ // with class
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+        this.is_declaration = this.ending_line.endsWith(";");
+		this.is_deleted = this.ending_line.endsWith("delete;");
+		this.is_defaulted = this.ending_line.endsWith("default;");
+        this.is_pure_virtual = this.ending_line.endsWith("0;");
+    }
+
+    apply_container_chain(container_chain){
+        this.signature = this.signature.slice(0, this.identifier_name_start) + container_chain + this.signature.slice(this.identifier_name_start, this.signature.length);
+    }
+
+	is_symbol_with_no_definition(){
+        return (this.is_declaration && !this.is_defaulted && !this.is_deleted && !this.is_pure_virtual);
+	}
+    
+};
+
+class StructSymbol extends Symbol{
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+    }
+
+    is_container(){
+        return true;
+    }
+
+    get_container_specifier(){
+        return this.name;
+    }
+};
+
+class ClassSymbol extends Symbol{
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+    }
+
+    is_container(){
+        return true;
+    }
+
+    get_container_specifier(){
+        return this.name;
+    }
+};
+
+class EnumSymbol extends Symbol{
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+    }
+
+    is_container(){
+        return true;
+    }
+
+    get_container_specifier(){
+        return this.name;
+    }
+};
+
+
+class SymbolParser{
+    static parse_symbol_iteration(symbol_array, container_chain, parsed_symbols, symbol_creator){
+        for(let i=0; i!=symbol_array.length; ++i){
+            let symbol = symbol_creator.create_symbol_from_kind(symbol_array[i], container_chain);
+            if(symbol.is_symbol_with_no_definition()){
+                parsed_symbols.push(symbol);
+            }
+            SymbolParser.parse_symbol_iteration(symbol_array[i].children, container_chain.add_container(symbol.get_container_specifier()), symbol_creator);
+        }
+    }
+
+    static parse_symbols(document, root_symbols){
+        return new Promise(
+            function(resolve, reject){
+                let declaration_symbols = [];
+                let definition_symbols = [];
+                const symbol_creator = new SymbolFactory(document);
+
+                const parse_symbol_iteration = (symbol_array, container_chain) => {
+                    // console.log(container_chain);
+                    // console.log(symbol_array);
+                    for(let i=0; i!=symbol_array.length; ++i){
+                        let symbol = symbol_creator.create_symbol_from_kind(symbol_array[i], container_chain);
+                        // console.log(symbol);
+                        if(symbol.is_symbol_with_no_definition()){
+                            declaration_symbols.push(symbol);
+                        } else {
+                            definition_symbols.push(symbol);
+                        }
+                        parse_symbol_iteration(symbol_array[i].children, ContainerChain.add_container(container_chain, symbol.get_container_specifier()));
+                    }
+                }
+
+                parse_symbol_iteration(root_symbols, "");
+                resolve({declarations: declaration_symbols, definitions: definition_symbols});
+            }
+        );
+    }
+};
+
+
+
+function symbols_for(uri){
+	return vscode.commands.executeCommand("vscode.executeDocumentSymbolProvider", uri);
 }
 
-async function filter_unique_header_symbols(header_symbols, source_symbols){
+
+function filter_unique_header_symbols(header_symbols, source_symbols){
     const unique_header_symbols = [];
     for(let i=0; i!=header_symbols.length; ++i){
         let unique = true;
-        for(let j=0; j!=source_symbols.length; ++i){
+        for(let j=0; j!=source_symbols.length; ++j){
             if(header_symbols[i].equals(source_symbols[j])){
                 unique = false;
                 break;
@@ -82,66 +227,79 @@ async function filter_unique_header_symbols(header_symbols, source_symbols){
 }
 
 
-async function update_symbol_index_for_header(header_uri){
+function update_symbol_index_from(header_uri, source_uri){
     console.log("update symbol index for: " + header_uri.toString());
-	// TODO: update cpp symbols if is_source_file
 
-	// only update if file is h/hpp
-	if(! await is_header_file(header_uri)){
-		console.log("no header file... ignoring");
-		return;
-	}
-	
-	await symbols_for(header_uri).then(
-		async function(header_symbols){
-			if(!header_symbols){
-                console.log("no header symbols found!");
-				return;
-			}
-
-			const header_file = await HeaderFile.get(header_uri);
-			if(header_file.source_file == null){
-				return;
-			}
-
-			await symbols_for(header_file.source_file.uri).catch(function(err){ console.log(err); }).then(
-				async function(source_symbols){
-					if(!source_symbols){
-						return;
-					}
-
-					// console.log(source_symbols);
-
-					const flatten_header_symbols_ = await flatten_header_symbols(header_symbols);
-					// const flatten_source_symbols_ = await flatten_header_symbols(source_symbols);
-					// console.log("flatten header symbols: ");
-					// console.log(flatten_header_symbols_);
-					// console.log("flatten source symbols: ");
-					// console.log(flatten_source_symbols_);
-					// const unique_symbols = await filter_unique_header_symbols(flatten_header_symbols_, flatten_source_symbols_);
-					// console.log("unique elements: ");
-					// console.log(unique_symbols);
-					symbol_index[header_file.source_file.uri.toString()] = flatten_header_symbols_;
-					console.log("updated symbol index!");
-				}
-			);
-		}
-	);
+    return new Promise(
+        function(resolve, reject){
+            vscode.workspace.openTextDocument(source_uri).then(
+                function(source_document){
+                    vscode.workspace.openTextDocument(header_uri).then(
+                        function(header_document){
+                            symbols_for(header_uri).then(
+                                function(header_symbols){
+                                    if(header_symbols === undefined){
+                                        header_symbols = [];
+                                    }
+        
+                                    symbols_for(source_uri).then(
+                                        function(source_symbols){
+                                            if(source_symbols === undefined){
+                                                source_symbols = [];
+                                            }
+        
+                                            SymbolParser.parse_symbols(header_document, header_symbols).then(
+                                                function(parsed_header_symbols){
+                                                    SymbolParser.parse_symbols(source_document, source_symbols).then(
+                                                        function(parsed_source_symbols){
+                                                            // make diff
+                                                            console.log("results: ");
+                                                            console.log(parsed_header_symbols.declarations);
+                                                            console.log(parsed_source_symbols.definitions);
+                                                            const unique_symbols = filter_unique_header_symbols(parsed_header_symbols.declarations, parsed_source_symbols.definitions);
+                                                            console.log(unique_symbols);
+                                                            symbol_index[source_uri.toString()] = unique_symbols;
+                                                            console.log("updated symbol index!");
+                                                            resolve(unique_symbols);
+                                                        }
+                                                    )
+                                                }
+                                            );
+                                        }
+                                    );
+                                }
+                            );
+                        }
+                    )
+                }
+            );
+        }
+    );
 }
 
-async function update_symbol_index(){
-	if(!vscode.window.activeTextEditor){
-		return;
-	}
-	const header_uri = vscode.window.activeTextEditor.document.uri;
-	await update_symbol_index_for_header(header_uri);
+
+function update_symbol_index(document){
+	const uri = document.uri;
+
+    return new Promise(
+        function(resolve, reject){
+            FilePairFactory.create_file_pair_from_uri(uri).then(
+                function(file_pair){
+                    update_symbol_index_from(file_pair.header_uri, file_pair.source_uri).then(
+                        function(symbols){
+                            resolve(symbols);
+                        }
+                    );
+                }
+            );
+        }
+    );
 }
 
 
 module.exports = {
+    MethodSymbol,
 	update_symbol_index,
-    update_symbol_index_for_header,
 	symbols_for,
-    Symbol,
     symbol_index
 }
