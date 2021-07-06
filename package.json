@@ -1,0 +1,76 @@
+{
+	"name": "definition-autocompletion",
+	"displayName": "C/C++ Definition Autocompletion",
+	"description": "Autocomplete function definition from their declaration",
+	"version": "0.0.1",
+	"publisher": "tibotix",
+	"engines": {
+		"vscode": "^1.57.0"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"categories": [
+		"Programming Languages",
+		"Other"
+	],
+	"icon": "images/icon.png",
+	"galleryBanner": {
+		"theme": "dark",
+		"color": "#161414"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tibotix/vscode-definition-autocompletion.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tibotix/vscode-definition-autocompletion/issues"
+	},
+	"homepage": "https://github.com/tibotix/vscode-definition-autocompletion/blob/master/README.md",
+	"main": "./extension.js",
+	"activationEvents": [
+		"onLanguage:c",
+		"onLanguage:cpp"
+	],
+	"contributes": {
+		"configuration":{
+			"title": "C/C++ Definition Autocompletion",
+			"properties": {
+				"definition-autocompletion.trigger_character": {
+					"type": "string",
+					"default": ".",
+					"description": "The character that triggers the completion suggestion on a new blank line."
+				},
+				"definition-autocompletion.update_index_on_save": {
+					"type": "boolean",
+					"default": true,
+					"description": "Wether to update the symbol index table on save."
+				},
+				"definition-autocompletion.update_index_on_open": {
+					"type": "boolean",
+					"default": false,
+					"description": "Wether to update the symbol index table when opening a new text document."
+				},
+				"definition-autocompletion.update_index_on_change": {
+					"type": "boolean",
+					"default": false,
+					"description": "Wether to update the symbol index table when changing a text document."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.57.0",
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.2.2",
+		"@types/node": "14.x",
+		"eslint": "^7.27.0",
+		"glob": "^7.1.7",
+		"mocha": "^8.4.0",
+		"typescript": "^4.3.2",
+		"vscode-test": "^1.5.2"
+	}
+}
