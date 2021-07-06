@@ -5,24 +5,34 @@
 <br>
 
 ## Features
+-----------
 
-To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` file:
+To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` file.
 
 <br>
 
-![feature X](images/definition-autocompletion-demo.gif)
+### **It supports member class functions:**
+![feature X](images/member_function_completion_demo.gif)
 
-This extension will parse every header file in your project and provides definition completion suggestions in the associated source file.
+<br>
+
+### **As well as normal functions:**
+![feature X](images/function_completion_demo.gif)
+
+Only function declarations with no function definition are suggested.
+
 
 <br>
 
 ## Requirements
+---------------
 
 - C/C++ Extension
 
 <br>
 
 ## Extension Settings
+---------------------
 
 This extension contributes the following settings:
 
@@ -33,23 +43,21 @@ This extension contributes the following settings:
 <br>
 
 ## Known Issues
+---------------
 
-There are no known issues.
+- When trigger the suggestion on a file not parsed yet, the function definition right after the triggerCharacter is not parsed correctly.
 
 <br>
 
 ## Future Plans
+---------------
 
 - support templates
-- automatically add class specifier to class member function definitions
-- only show these who are not already defined yet
-
-
-
 
 <br>
 
 ## Release Notes
+----------------
 
 ### 1.0.0
 
