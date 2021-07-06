@@ -1,4 +1,4 @@
-# C/C++ Definition Autocompletion README
+# C/C++ Definition Autocompletion
 
 **Autocomplete function definitions from already declared function signatures.**
 
