@@ -64,8 +64,21 @@ async function flatten_header_symbols(symbols){
 	return flatted_symbols;
 }
 
-async function dif_symbols(header_symbols, source_symbols){
-	return header_symbols.filter(x => !source_symbols.includes(x));
+async function filter_unique_header_symbols(header_symbols, source_symbols){
+    const unique_header_symbols = [];
+    for(let i=0; i!=header_symbols.length; ++i){
+        let unique = true;
+        for(let j=0; j!=source_symbols.length; ++i){
+            if(header_symbols[i].equals(source_symbols[j])){
+                unique = false;
+                break;
+            }
+        }
+        if(unique){
+            unique_header_symbols.push(header_symbols[i]);
+        }
+    }
+	return unique_header_symbols;
 }
 
 
@@ -105,7 +118,7 @@ async function update_symbol_index_for_header(header_uri){
 					// console.log(flatten_header_symbols_);
 					// console.log("flatten source symbols: ");
 					// console.log(flatten_source_symbols_);
-					// const unique_symbols = await dif_symbols(flatten_header_symbols_, flatten_source_symbols_);
+					// const unique_symbols = await filter_unique_header_symbols(flatten_header_symbols_, flatten_source_symbols_);
 					// console.log("unique elements: ");
 					// console.log(unique_symbols);
 					symbol_index[header_file.source_file.uri.toString()] = flatten_header_symbols_;
