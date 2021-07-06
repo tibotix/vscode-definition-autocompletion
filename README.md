@@ -11,7 +11,7 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 
 <br>
 
-### **It supports member class functions:**
+### **Support for member class functions:**
 ![feature X](images/member_function_completion_demo.gif)
 
 <br>
@@ -53,6 +53,7 @@ This extension contributes the following settings:
 ---------------
 
 - support templates
+- fix issues
 
 <br>
 
