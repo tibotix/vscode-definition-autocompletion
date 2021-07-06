@@ -26,14 +26,12 @@ async function activate(context) {
 	if(conf.get("update_index_on_save")){
 		context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(update_symbol_index));
 	}
-	
-	if(conf.get("update_index_on_open")){
-		context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(update_symbol_index));
-	}
 
 	if(conf.get("update_index_on_change")){
 		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(update_symbol_index));
 	}
+
+	// TODO: maybe add more events
 
 	const trigger_char = conf.get("trigger_character");
 	
