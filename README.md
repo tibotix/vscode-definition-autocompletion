@@ -12,8 +12,6 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 
 ![feature X](images/definition-autocompletion-demo.gif)
 
-![](images/icon.png)
-
 The extension will parse every header file in your project in provides definition completion suggestions in the associated source file.
 
 <br>
