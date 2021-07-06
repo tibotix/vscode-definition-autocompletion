@@ -2,7 +2,7 @@
 	"name": "definition-autocompletion",
 	"displayName": "C/C++ Definition Autocompletion",
 	"description": "Autocomplete function definition from their declaration",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"publisher": "tibotix",
 	"engines": {
 		"vscode": "^1.57.0"
@@ -25,7 +25,7 @@
 		"url": "https://github.com/tibotix/vscode-definition-autocompletion/issues"
 	},
 	"homepage": "https://github.com/tibotix/vscode-definition-autocompletion/blob/master/README.md",
-	"main": "./extension.js",
+	"main": "./src/main.js",
 	"activationEvents": [
 		"onLanguage:c",
 		"onLanguage:cpp"
