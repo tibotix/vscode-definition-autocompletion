@@ -228,7 +228,7 @@ function filter_unique_header_symbols(header_symbols, source_symbols){
 
 
 function update_symbol_index_from(header_uri, source_uri){
-    console.log("update symbol index for: " + header_uri.toString());
+    // console.log("update symbol index for: " + header_uri.toString());
 
     return new Promise(
         function(resolve, reject){
@@ -241,25 +241,29 @@ function update_symbol_index_from(header_uri, source_uri){
                                     if(header_symbols === undefined){
                                         header_symbols = [];
                                     }
+
+                                    // console.log(header_symbols);
         
                                     symbols_for(source_uri).then(
                                         function(source_symbols){
                                             if(source_symbols === undefined){
                                                 source_symbols = [];
                                             }
+
+                                            // console.log(source_symbols);
         
                                             SymbolParser.parse_symbols(header_document, header_symbols).then(
                                                 function(parsed_header_symbols){
                                                     SymbolParser.parse_symbols(source_document, source_symbols).then(
                                                         function(parsed_source_symbols){
                                                             // make diff
-                                                            console.log("results: ");
-                                                            console.log(parsed_header_symbols.declarations);
-                                                            console.log(parsed_source_symbols.definitions);
+                                                            // console.log("results: ");
+                                                            // console.log(parsed_header_symbols.declarations);
+                                                            // console.log(parsed_source_symbols.definitions);
                                                             const unique_symbols = filter_unique_header_symbols(parsed_header_symbols.declarations, parsed_source_symbols.definitions);
-                                                            console.log(unique_symbols);
+                                                            // console.log(unique_symbols);
                                                             symbol_index[source_uri.toString()] = unique_symbols;
-                                                            console.log("updated symbol index!");
+                                                            // console.log("updated symbol index!");
                                                             resolve(unique_symbols);
                                                         }
                                                     )
@@ -285,6 +289,7 @@ function update_symbol_index(document){
         function(resolve, reject){
             FilePairFactory.create_file_pair_from_uri(uri).then(
                 function(file_pair){
+                    // console.log(file_pair);
                     update_symbol_index_from(file_pair.header_uri, file_pair.source_uri).then(
                         function(symbols){
                             resolve(symbols);

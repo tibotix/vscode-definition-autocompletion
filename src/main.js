@@ -22,7 +22,7 @@ function create_completions(symbols, delete_range){
 
 function activate(context) {
 
-	console.log("Definition Autocompletion activated");
+	// console.log("Definition Autocompletion activated");
 
 	if(conf.get("update_index_on_save")){
 		context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(update_symbol_index));
@@ -40,16 +40,16 @@ function activate(context) {
 		provideCompletionItems(document, position, token, context){
 			// only trigger when the trigger character is triggered
 			if(context.triggerKind != vscode.CompletionTriggerKind.TriggerCharacter){
-				console.log("wrong trigger kind");
+				// console.log("wrong trigger kind");
 				return null;
 			}
 
-			console.log("'" + document.lineAt(position).text + "'");
+			// console.log("'" + document.lineAt(position).text + "'");
 
 
 			// only trigger when line is . is the only character in the line
 			if(! document.lineAt(position).text.match(/^(\s*)\.$/g)){
-				console.log("don't match!");
+				// console.log("don't match!");
 				return null;
 			}
 
@@ -58,19 +58,19 @@ function activate(context) {
 			const uri = document.uri;
 			
 			if(! is_source_file(uri)){
-				console.log("is not a source file...");
+				// console.log("is not a source file...");
 				return null;
 			}
 
 			
 			var symbols = symbol_index[uri.toString()];
-			console.log("got symbols for current file");
-			console.log(symbols);
+			// console.log("got symbols for current file");
+			// console.log(symbols);
 
 			return new Promise(
 				function(resolve, reject){
 					if(symbols === undefined){
-						console.log("forced symbol update...");
+						// console.log("forced symbol update...");
 						update_symbol_index(vscode.window.activeTextEditor.document).then(
 							function(symbols_array){
 								resolve(create_completions(symbols_array, delete_range));			

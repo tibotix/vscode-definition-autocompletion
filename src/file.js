@@ -93,7 +93,7 @@ class FilePairFactory {
 		return new Promise(
 			function(resolve, reject){
 				if(file_pairs.hasOwnProperty(beginning)){
-					console.log("returning cached file pair");
+					// console.log("returning cached file pair");
 					resolve(file_pairs[beginning]);
 				}
 		
