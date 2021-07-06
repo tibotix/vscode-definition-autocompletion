@@ -1,9 +1,22 @@
 const vscode = require('vscode');
-const {update_symbol_index, symbol_index} = require("./symbol");
-const { is_source_file} = require("./file");
+const {update_symbol_index, symbol_index, update_symbol_index_for_header} = require("./symbol");
+const { is_source_file, FileFinder} = require("./file");
 
 
 let conf = vscode.workspace.getConfiguration("definition-autocompletion");
+
+
+
+async function update_whole_workspace_index(){
+	await (await (await (await (await new FileFinder().match_base()).max(20)).match_file_name("*")).match_extensions(["h", "hpp"])).find_files().then(
+		async function(source_uri_array){
+			for(let i=0; i!=source_uri_array.length; ++i){
+				await update_symbol_index_for_header(source_uri_array[i]);
+			}
+		}
+	);
+}
+
 
 
 async function activate(context) {
@@ -72,7 +85,8 @@ async function activate(context) {
 	}, trigger_char);
 
 	context.subscriptions.push(provider);
-	update_symbol_index();
+
+	setTimeout(update_whole_workspace_index, 10*1000); // after 10 seconds update whole workspace index
 }
 
 async function deactivate() {}

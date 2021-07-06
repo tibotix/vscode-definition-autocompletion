@@ -69,7 +69,8 @@ async function dif_symbols(header_symbols, source_symbols){
 }
 
 
-async function update_symbol_index_for(header_uri){
+async function update_symbol_index_for_header(header_uri){
+    console.log("update symbol index for: " + header_uri.toString());
 	// TODO: update cpp symbols if is_source_file
 
 	// only update if file is h/hpp
@@ -81,6 +82,7 @@ async function update_symbol_index_for(header_uri){
 	await symbols_for(header_uri).then(
 		async function(header_symbols){
 			if(!header_symbols){
+                console.log("no header symbols found!");
 				return;
 			}
 
@@ -119,12 +121,13 @@ async function update_symbol_index(){
 		return;
 	}
 	const header_uri = vscode.window.activeTextEditor.document.uri;
-	await update_symbol_index_for(header_uri);
+	await update_symbol_index_for_header(header_uri);
 }
 
 
 module.exports = {
 	update_symbol_index,
+    update_symbol_index_for_header,
 	symbols_for,
     Symbol,
     symbol_index
