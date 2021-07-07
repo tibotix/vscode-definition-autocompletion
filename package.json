@@ -44,7 +44,7 @@
 				"definition-autocompletion.update_index_on_save": {
 					"type": "boolean",
 					"default": true,
-					"description": "Wether to update the symbol index table on save."
+					"description": "Wether to update the symbol index table when saving the current text document."
 				},
 				"definition-autocompletion.update_index_on_change": {
 					"type": "boolean",
