@@ -29,36 +29,58 @@ class SymbolFactory {
 };
 
 
+
+function get_eol(document){
+    switch (document.eol) {
+        case 1:
+            return "\n";
+        case 2:
+            return "\r\n";
+        default:
+            return "\r\n";
+    }
+}
+
 class Symbol {
+
+    static create_signature(symbol_lines, container_chain, identifier_name_start, eol){
+        // let signature = "";
+        const signature = []
+        for(let i=0; i<symbol_lines.length-1; ++i){
+            // console.log("adding: > " + symbol_lines[i].trim() + " <");
+            signature.push(symbol_lines[i].trim());
+        }
+        const last_line = symbol_lines[symbol_lines.length-1].trim();
+        // console.log("last line: " + last_line);
+        // console.log("id_start: " + identifier_name_start);
+        signature.push(last_line.slice(0, identifier_name_start) + container_chain + last_line.slice(identifier_name_start, last_line.length-1));
+        return signature.join(eol).trim();
+    }
 
     constructor(symbol_obj, document, container_chain){
 		// console.log("symbol_obj: ");
 		// console.log(symbol_obj);
-        let range_very_end = symbol_obj.range.end;
-		let range_very_start = symbol_obj.range.start;
+        const eol = get_eol(document);
         
-        this.ending_line = document.lineAt(range_very_end).text;
-        // console.log(this.ending_line);
-		this.signature = this.ending_line.substring(range_very_start.character, range_very_end.character-1);
-        // console.log(this.signature);
-        this.identifier_name_start = symbol_obj.selectionRange.start.character - range_very_start.character;
-        this.container_chain = container_chain;
-        this.apply_container_chain(container_chain);
+        this.symbol_text = document.getText(symbol_obj.range);
+        this.symbol_lines = this.symbol_text.split(eol);
+        //console.log("container chain: " + container_chain);
+        //console.log("symbol_text: > " + this.symbol_text + " <");
+        //console.log("symbol_lines: ");
+        //console.log(this.symbol_lines);
+		this.signature = Symbol.create_signature(this.symbol_lines, container_chain, symbol_obj.selectionRange.start.character - symbol_obj.range.start.character, eol);
+        // console.log("signature: > " + this.signature + " <");
         this.clear_attributes();
-        this.ending_line = this.ending_line.trim();
+        this.symbol_text = this.symbol_text.trim();
         this.signature = this.signature.trim();
-        // console.log(this.signature);
 
 		this.kind = symbol_obj.kind;
-		this.name = container_chain + symbol_obj.name;
+        this.name = symbol_obj.name;
+		this.full_name = container_chain + symbol_obj.name;
 	}
 
     clear_attributes(){
         this.signature = this.signature.replace(" override", "").replace("virtual ", "").replace("[[nodiscard]] ", "").replace("explicit ", "").replace("static ", "").replace("inline ", "");
-    }
-
-    apply_container_chain(container_chain){
-        ;
     }
 
 	is_symbol_with_no_definition(){
@@ -75,7 +97,7 @@ class Symbol {
 
     equals(other){
         // 4 - 11
-        return (this.name == other.name);
+        return (this.full_name == other.full_name);
     }
 
 };
@@ -84,14 +106,10 @@ class FunctionSymbol extends Symbol{ // without class
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
         // TODO: catch header definitions
-        this.is_declaration = this.ending_line.endsWith(";");
-		this.is_deleted = this.ending_line.endsWith("delete;");
-		this.is_defaulted = this.ending_line.endsWith("default;");
-        this.is_pure_virtual = this.ending_line.endsWith("0;");
-    }
-
-    apply_container_chain(container_chain){
-        // as this is a function we do nothing
+        this.is_declaration = this.symbol_text.endsWith(";");
+		this.is_deleted = this.symbol_text.endsWith("delete;");
+		this.is_defaulted = this.symbol_text.endsWith("default;");
+        this.is_pure_virtual = this.symbol_text.endsWith("0;");
     }
 
 	is_symbol_with_no_definition(){
@@ -103,14 +121,10 @@ class FunctionSymbol extends Symbol{ // without class
 class MethodSymbol extends Symbol{ // with class
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
-        this.is_declaration = this.ending_line.endsWith(";");
-		this.is_deleted = this.ending_line.endsWith("delete;");
-		this.is_defaulted = this.ending_line.endsWith("default;");
-        this.is_pure_virtual = this.ending_line.endsWith("0;");
-    }
-
-    apply_container_chain(container_chain){
-        this.signature = this.signature.slice(0, this.identifier_name_start) + container_chain + this.signature.slice(this.identifier_name_start, this.signature.length);
+        this.is_declaration = this.symbol_text.endsWith(";");
+		this.is_deleted = this.symbol_text.endsWith("delete;");
+		this.is_defaulted = this.symbol_text.endsWith("default;");
+        this.is_pure_virtual = this.symbol_text.endsWith("0;");
     }
 
 	is_symbol_with_no_definition(){
@@ -163,16 +177,6 @@ class EnumSymbol extends Symbol{
 
 
 class SymbolParser{
-    static parse_symbol_iteration(symbol_array, container_chain, parsed_symbols, symbol_creator){
-        for(let i=0; i!=symbol_array.length; ++i){
-            let symbol = symbol_creator.create_symbol_from_kind(symbol_array[i], container_chain);
-            if(symbol.is_symbol_with_no_definition()){
-                parsed_symbols.push(symbol);
-            }
-            SymbolParser.parse_symbol_iteration(symbol_array[i].children, container_chain.add_container(symbol.get_container_specifier()), symbol_creator);
-        }
-    }
-
     static parse_symbols(document, root_symbols){
         return new Promise(
             function(resolve, reject){

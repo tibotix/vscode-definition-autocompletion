@@ -48,6 +48,7 @@ class FileFinder{
         return include_pattern;
     }
 
+	// TODO: maybe use RelativePattern
     find_files(){
         var include_pattern = this.generate_include_pattern();
 		const max_results = this.max_results;

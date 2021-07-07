@@ -9,9 +9,9 @@ let conf = vscode.workspace.getConfiguration("definition-autocompletion");
 function create_completions(symbols, delete_range){
 	const completions = [];
 	for(let i=0; i<symbols.length; i++){
-		// TODO: support templates
+		// TODO: support declarations where function name is not on last line
 		// TODO: parse symbol after `.` correct
-		const comp = new vscode.CompletionItem(symbols[i].name, symbols[i].kind);
+		const comp = new vscode.CompletionItem(symbols[i].full_name, symbols[i].kind);
 		comp.insertText = new vscode.SnippetString(symbols[i].signature + " {\n\t$0\n}");
 		comp.detail = symbols[i].signature;
 		comp.additionalTextEdits = [vscode.TextEdit.delete(delete_range)];
