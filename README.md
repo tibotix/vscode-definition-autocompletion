@@ -11,13 +11,32 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 
 <br>
 
-### **Support for member class functions:**
-![feature X](images/member_function_completion_demo.gif)
+- ### **Support for member class functions:**
+![Member function completion demo](images/member_function_completion_demo.gif)
 
 <br>
 
-### **As well as normal functions:**
-![feature X](images/function_completion_demo.gif)
+
+- ### **As well as for normal functions:**
+![Function completion demo](images/function_completion_demo.gif)
+
+<br>
+
+- ### **Support for template functions:**
+![Template completion demo](images/template_completion_demo.gif)
+
+<br>
+
+- ### **Detecting in header defined functions and don't suggesting them:**
+![Inline demo](images/inline_demo.gif)
+
+<br>
+
+- ### **Supporting nested member class functions:**
+![Nested member function completion demo](images/nested_member_function_completion_demo.gif)
+
+<br>
+
 
 Only function declarations with no function definition are suggested.
 
@@ -52,13 +71,19 @@ This extension contributes the following settings:
 ## Future Plans
 ---------------
 
-- support templates
 - fix issues
+- automatically add constructor member initialization template when auto-completing a constructor
 
 <br>
 
 ## Release Notes
 ----------------
+
+### 1.1.0
+
+ - supporting templates
+ - supporting inline functions
+ - supporting nested class members
 
 ### 1.0.0
 
