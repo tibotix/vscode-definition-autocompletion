@@ -37,6 +37,11 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 
 <br>
 
+- ### **Special autocompletion handling for constructors:**
+![Constructor demo](images/constructor_demo.gif)
+
+<br>
+
 
 - ### **Only function declarations with no function definition are suggested.**
 
@@ -65,6 +70,7 @@ This extension contributes the following settings:
 ---------------
 
 - When trigger the suggestion on a file not parsed yet, the function definition right after the triggerCharacter is not parsed correctly.
+- nested return Types are not extended by the outer layer Type
 
 <br>
 
@@ -72,12 +78,15 @@ This extension contributes the following settings:
 ---------------
 
 - fix issues
-- automatically add constructor member initialization template when auto-completing a constructor
 
 <br>
 
 ## Release Notes
 ----------------
+
+### 1.1.1
+
+- supporting constructors member initialization list
 
 ### 1.1.0
 
