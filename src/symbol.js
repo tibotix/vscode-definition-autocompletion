@@ -45,6 +45,7 @@ function get_eol(document){
 
 class Symbol {
 
+    // TODO: add support for nested return types that are not accessible directly. maybe make additional return type chain...
     static create_signature(symbol_lines, container_chain, identifier_name_start, eol){
         // let signature = "";
         const signature = []
@@ -81,6 +82,7 @@ class Symbol {
 		this.full_name = container_chain + symbol_obj.name;
 	}
 
+    // TODO: add more attributes and use regex patterns
     clear_attributes(){
         this.signature = this.signature.replace(" override", "").replace("virtual ", "").replace("[[nodiscard]] ", "").replace("explicit ", "").replace("static ", "").replace("inline ", "");
     }
@@ -278,7 +280,6 @@ function update_symbol_index_from(header_uri, source_uri){
                                                 function(parsed_header_symbols){
                                                     SymbolParser.parse_symbols(source_document, source_symbols).then(
                                                         function(parsed_source_symbols){
-                                                            // make diff
                                                             // console.log("results: ");
                                                             // console.log(parsed_header_symbols.declarations);
                                                             // console.log(parsed_source_symbols.definitions);

@@ -32,7 +32,7 @@ function activate(context) {
 		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(update_symbol_index));
 	}
 
-	// TODO: maybe add more events
+	// TODO: maybe add more events and settings for custom additional autocompletion text
 
 	const trigger_char = conf.get("trigger_character");
 	
