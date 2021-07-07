@@ -11,6 +11,7 @@ class SymbolFactory {
     }
 
     create_symbol_from_kind(symbol_obj, container_chain){
+        // limitation: functions with a space between `<function_name>` and `()` are false detected as variables
         switch (symbol_obj.kind) {
             case 11:
                 return new FunctionSymbol(symbol_obj, this.document, container_chain);
@@ -43,11 +44,13 @@ function get_eol(document){
     }
 }
 
-class Symbol {
+const attributes_regex = /\s?(\[\[([^\[\]]*?[^\s\[\]][^\[\]]*?)+?\]\]\s?)+/g;
+const beginning_specifiers = ["typedef", "inline", "virtual", "explicit", "friend", "constexpr", "consteval", "constinit", "register", "static", "thread_local", "extern", "mutable"];
+const ending_specifiers = ["override"];
 
+class SignatureFactory {
     // TODO: add support for nested return types that are not accessible directly. maybe make additional return type chain...
     static create_signature(symbol_lines, container_chain, identifier_name_start, eol){
-        // let signature = "";
         const signature = []
         for(let i=0; i<symbol_lines.length-1; ++i){
             // console.log("adding: > " + symbol_lines[i].trim() + " <");
@@ -57,8 +60,34 @@ class Symbol {
         // console.log("last line: " + last_line);
         // console.log("id_start: " + identifier_name_start);
         signature.push(last_line.slice(0, identifier_name_start) + container_chain + last_line.slice(identifier_name_start, last_line.length-1));
-        return signature.join(eol).trim();
+        return SignatureFactory.clear_keywords(signature.join(eol).trim()).trim();
     }
+
+    static clear_keywords(signature){
+        signature = SignatureFactory.clear_attributes(signature);
+        signature = SignatureFactory.clear_specifiers(signature);
+        return signature;
+    }
+    
+    static clear_attributes(signature){
+        return signature.replace(attributes_regex, "");
+    }
+
+    static clear_specifiers(signature){
+        for(let i=0; i!=beginning_specifiers.length; ++i){
+            signature = signature.replace([beginning_specifiers[i]], "");
+        }
+        for(let i=0; i!=ending_specifiers.length; ++i){
+            signature = signature.replace([ending_specifiers[i]], "");
+        }
+        return signature;
+    }
+
+
+};
+
+class Symbol {
+
 
     constructor(symbol_obj, document, container_chain){
 		// console.log("symbol_obj: ");
@@ -67,25 +96,18 @@ class Symbol {
         
         this.symbol_text = document.getText(symbol_obj.range);
         this.symbol_lines = this.symbol_text.split(eol);
+        this.symbol_text = this.symbol_text.trim();
+		this.signature = SignatureFactory.create_signature(this.symbol_lines, container_chain, symbol_obj.selectionRange.start.character - symbol_obj.range.start.character, eol);
         //console.log("container chain: " + container_chain);
         //console.log("symbol_text: > " + this.symbol_text + " <");
         //console.log("symbol_lines: ");
         //console.log(this.symbol_lines);
-		this.signature = Symbol.create_signature(this.symbol_lines, container_chain, symbol_obj.selectionRange.start.character - symbol_obj.range.start.character, eol);
         // console.log("signature: > " + this.signature + " <");
-        this.clear_attributes();
-        this.symbol_text = this.symbol_text.trim();
-        this.signature = this.signature.trim();
 
 		this.kind = symbol_obj.kind;
         this.name = symbol_obj.name;
 		this.full_name = container_chain + symbol_obj.name;
 	}
-
-    // TODO: add more attributes and use regex patterns
-    clear_attributes(){
-        this.signature = this.signature.replace(" override", "").replace("virtual ", "").replace("[[nodiscard]] ", "").replace("explicit ", "").replace("static ", "").replace("inline ", "");
-    }
 
 	is_symbol_with_no_definition(){
         return false;
@@ -112,11 +134,10 @@ class Symbol {
 class BaseFunctionSymbol extends Symbol{
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
-        // TODO: catch header definitions
-        this.is_declaration = this.symbol_text.endsWith(";");
-		this.is_deleted = this.symbol_text.endsWith("delete;");
-		this.is_defaulted = this.symbol_text.endsWith("default;");
-        this.is_pure_virtual = this.symbol_text.endsWith("0;");
+        this.is_declaration = this.symbol_text.match(/;\s*?($|\/\/)/g);
+		this.is_deleted = this.symbol_text.match(/delete\s*?;($|\/\/)/g);
+		this.is_defaulted = this.symbol_text.match(/default\s*?;($|\/\/)/g);
+        this.is_pure_virtual = this.symbol_text.match(/0\s*?;($|\/\/)/g);
     }
 
 	is_symbol_with_no_definition(){
