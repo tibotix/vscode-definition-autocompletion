@@ -1,6 +1,6 @@
 # C/C++ Definition Autocompletion
 
-**Autocomplete function definitions from already declared function signatures.**
+**Autocomplete function definitions from declared functions on the fly.**
 
 <br>
 
@@ -9,42 +9,27 @@
 
 To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` file.
 
-<br>
+### **Currently we are supporting:**
+- member class functions
+- normal functions
+- template functions
+- nested member class functions
+- and many more...
 
-- ### **Support for member class functions:**
+### **Additional Features:**
+- only functions which are not defined already are suggested
+- special handling of constructors to quickly have a member initializer list on hands
+- inlined / deleted / defaulted / pure virtual functions are not suggested
+
+ <br>
+
+## Examples:
+-----------
+
 ![Member function completion demo](images/member_function_completion_demo.gif)
 
-<br>
 
-
-- ### **As well as for normal functions:**
-![Function completion demo](images/function_completion_demo.gif)
-
-<br>
-
-- ### **Support for template functions:**
-![Template completion demo](images/template_completion_demo.gif)
-
-<br>
-
-- ### **Detecting in header defined functions and don't suggesting them:**
-![Inline demo](images/inline_demo.gif)
-
-<br>
-
-- ### **Supporting nested member class functions:**
-![Nested member function completion demo](images/nested_member_function_completion_demo.gif)
-
-<br>
-
-- ### **Special autocompletion handling for constructors:**
 ![Constructor demo](images/constructor_demo.gif)
-
-<br>
-
-
-- ### **Only function declarations with no function definition are suggested.**
-
 
 <br>
 
@@ -84,9 +69,13 @@ This extension contributes the following settings:
 ## Release Notes
 ----------------
 
+### 1.1.2
+
+  - detect more function attributes and specifiers correctly
+
 ### 1.1.1
 
-- supporting constructors member initialization list
+  - supporting constructors member initialization list
 
 ### 1.1.0
 
