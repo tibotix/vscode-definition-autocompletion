@@ -22,6 +22,8 @@ class SymbolFactory {
                 return new MethodSymbol(symbol_obj, this.document, container_chain);
             case 22:
                 return new StructSymbol(symbol_obj, this.document, container_chain);
+            case 24:
+                return new MethodSymbol(symbol_obj, this.document, container_chain);
             default:
                 return new Symbol(symbol_obj, this.document, container_chain);
         }
@@ -96,13 +98,16 @@ class Symbol {
     }
 
     equals(other){
-        // 4 - 11
         return (this.full_name == other.full_name);
+    }
+
+    get_insert_text(){
+        return " {\n\t$0\n}";
     }
 
 };
 
-class FunctionSymbol extends Symbol{ // without class
+class BaseFunctionSymbol extends Symbol{
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
         // TODO: catch header definitions
@@ -115,21 +120,34 @@ class FunctionSymbol extends Symbol{ // without class
 	is_symbol_with_no_definition(){
         return (this.is_declaration && !this.is_defaulted && !this.is_deleted && !this.is_pure_virtual);
 	}
+}
 
-};
-
-class MethodSymbol extends Symbol{ // with class
+class FunctionSymbol extends BaseFunctionSymbol{ // without class
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
-        this.is_declaration = this.symbol_text.endsWith(";");
-		this.is_deleted = this.symbol_text.endsWith("delete;");
-		this.is_defaulted = this.symbol_text.endsWith("default;");
-        this.is_pure_virtual = this.symbol_text.endsWith("0;");
+    }
+};
+
+class MethodSymbol extends BaseFunctionSymbol{ // with class
+    constructor(symbol_obj, document, container_chain){
+        super(symbol_obj, document, container_chain);
+        this.is_constructor_symbol = this.is_constructor();
     }
 
-	is_symbol_with_no_definition(){
-        return (this.is_declaration && !this.is_defaulted && !this.is_deleted && !this.is_pure_virtual);
-	}
+    is_constructor(){
+        const sig_split = this.signature.split("::");
+        if(sig_split.length > 1 && sig_split[sig_split.length-2] == sig_split[sig_split.length-1].substring(0, sig_split[sig_split.length-1].indexOf("("))){
+            return true;
+        }
+        return false;
+    }
+
+    get_insert_text(){
+        if(this.is_constructor_symbol){
+            return " : ${1:m_var}(${2:param}) \n{$0}";
+        }
+        return super.get_insert_text();
+    }
     
 };
 

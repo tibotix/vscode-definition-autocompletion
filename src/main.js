@@ -12,7 +12,7 @@ function create_completions(symbols, delete_range){
 		// TODO: support declarations where function name is not on last line
 		// TODO: parse symbol after `.` correct
 		const comp = new vscode.CompletionItem(symbols[i].full_name, symbols[i].kind);
-		comp.insertText = new vscode.SnippetString(symbols[i].signature + " {\n\t$0\n}");
+		comp.insertText = new vscode.SnippetString(symbols[i].signature + symbols[i].get_insert_text());
 		comp.detail = symbols[i].signature;
 		comp.additionalTextEdits = [vscode.TextEdit.delete(delete_range)];
 		completions.push(comp);
