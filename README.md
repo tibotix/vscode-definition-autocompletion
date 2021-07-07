@@ -38,7 +38,7 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 <br>
 
 
-Only function declarations with no function definition are suggested.
+- ### **Only function declarations with no function definition are suggested.**
 
 
 <br>
