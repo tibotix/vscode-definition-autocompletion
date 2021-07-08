@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const {FilePairFactory } = require("./file");
 const { ContainerChain } = require('./container_chain');
+const {RelativeTextEditor} = require("./relative_texteditor");
 
 
 var symbol_index = new Object(); // contains only declaration symbols
@@ -50,17 +51,12 @@ const ending_specifiers = ["override"];
 
 class SignatureFactory {
     // TODO: add support for nested return types that are not accessible directly. maybe make additional return type chain...
-    static create_signature(symbol_lines, container_chain, identifier_name_start, eol){
-        const signature = []
-        for(let i=0; i<symbol_lines.length-1; ++i){
-            // console.log("adding: > " + symbol_lines[i].trim() + " <");
-            signature.push(symbol_lines[i].trim());
-        }
-        const last_line = symbol_lines[symbol_lines.length-1].trim();
-        // console.log("last line: " + last_line);
-        // console.log("id_start: " + identifier_name_start);
-        signature.push(last_line.slice(0, identifier_name_start) + container_chain + last_line.slice(identifier_name_start, last_line.length-1));
-        return SignatureFactory.clear_keywords(signature.join(eol).trim()).trim();
+    static create_signature(symbol_obj, symbol_text, container_chain, eol){
+        const rel_text = new RelativeTextEditor(symbol_text, symbol_obj.range.start.with({character: 0}), eol);
+        rel_text.insert(symbol_obj.selectionRange.start, container_chain);
+        let signature = rel_text.get_text();
+        signature = signature.substring(0, signature.length-1);
+        return SignatureFactory.clear_keywords(signature).trim();
     }
 
     static clear_keywords(signature){
@@ -94,14 +90,11 @@ class Symbol {
 		// console.log(symbol_obj);
         const eol = get_eol(document);
         
-        this.symbol_text = document.getText(symbol_obj.range);
-        this.symbol_lines = this.symbol_text.split(eol);
-        this.symbol_text = this.symbol_text.trim();
-		this.signature = SignatureFactory.create_signature(this.symbol_lines, container_chain, symbol_obj.selectionRange.start.character - symbol_obj.range.start.character, eol);
-        //console.log("container chain: " + container_chain);
-        //console.log("symbol_text: > " + this.symbol_text + " <");
-        //console.log("symbol_lines: ");
-        //console.log(this.symbol_lines);
+        const relative_start_position = symbol_obj.range.start.with({character: 0});
+        this.symbol_text = document.getText(new vscode.Range(relative_start_position, symbol_obj.range.end));
+        this.signature = SignatureFactory.create_signature(symbol_obj, this.symbol_text, container_chain, eol);
+        // console.log("container chain: " + container_chain);
+        // console.log("symbol_text: > " + this.symbol_text + " <");
         // console.log("signature: > " + this.signature + " <");
 
 		this.kind = symbol_obj.kind;
