@@ -2,7 +2,7 @@
 	"name": "definition-autocompletion",
 	"displayName": "C/C++ Definition Autocompletion",
 	"description": "Autocomplete C/C++ function definitions from their respective declarations on the fly. Supporting class member functions, template functions and many more.",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"publisher": "tibotix",
 	"engines": {
 		"vscode": "^1.57.0"
@@ -53,7 +53,7 @@
 				},
 				"definition-autocompletion.update_index_interval": {
 					"type": "number",
-					"default": 15,
+					"default": 20,
 					"description": "The interval in seconds in which the symbol index table will update. Specify 0 to deactivate the interval."
 				}
 			}

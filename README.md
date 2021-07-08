@@ -20,6 +20,7 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 - only functions which are not defined already are suggested
 - special handling of constructors to quickly have a member initializer list on hands
 - inlined / deleted / defaulted / pure virtual functions are not suggested
+- specify interval to automatically update symbols
 
  <br>
 
@@ -45,17 +46,16 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 
 This extension contributes the following settings:
 
-* `definition-autocompletion.trigger_character`: The character that triggers the completion suggestion on a new blank line.
-* `definition-autocompletion.update_index_on_save`: Wether to update the symbol index table when saving the current text document.
-* `definition-autocompletion.update_index_on_change`: Wether to update the symbol index table when changing the active text editor
-* `definition-autocompletion.update_index_interval` : The interval in seconds in which the symbol index table will update. Specify 0 to deactivate the interval.
+* `definition-autocompletion.trigger_character`: The character that triggers the completion suggestion on a new blank line. (default=`.`)
+* `definition-autocompletion.update_index_on_save`: Wether to update the symbol index table when saving the current text document. (default=`true`)
+* `definition-autocompletion.update_index_on_change`: Wether to update the symbol index table when changing the active text editor. (default=`false`)
+* `definition-autocompletion.update_index_interval` : The interval in seconds in which the symbol index table will update. Specify `0` to deactivate the interval. (default=`20`)
 
 <br>
 
 ## Known Issues
 ---------------
 
-- When trigger the suggestion on a file not parsed yet, the function definition right after the triggerCharacter is not parsed correctly.
 - nested return Types are not extended by the outer layer Type
 
 <br>
@@ -69,6 +69,10 @@ This extension contributes the following settings:
 
 ## Release Notes
 ----------------
+
+### 1.1.5
+
+  - automatically index a not yet indexed file when switching to it, regardless of the `definition-autocompletion.update_index_on_change` option.
 
 ### 1.1.4
 
