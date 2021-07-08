@@ -325,7 +325,7 @@ function update_symbol_index_from(header_uri, source_uri){
 
 
 function update_symbol_index(document){
-    if(document === undefined){
+    if(document === undefined || document.uri === undefined){
         return null;
     }
     
