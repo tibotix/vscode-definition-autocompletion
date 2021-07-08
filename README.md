@@ -69,6 +69,10 @@ This extension contributes the following settings:
 ## Release Notes
 ----------------
 
+### 1.1.4
+
+  - fixed issues with member function definitions
+
 ### 1.1.3
 
   - fixed issues with definition detection in source files
