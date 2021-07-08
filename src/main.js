@@ -1,15 +1,15 @@
 const vscode = require('vscode');
-const {update_symbol_index, symbol_index} = require("./symbol");
+const {update_symbol_index, symbol_index, update_first_time} = require("./symbol");
 const { is_source_file } = require("./file");
 
 
 let conf = vscode.workspace.getConfiguration("definition-autocompletion");
 
 
+
 function create_completions(symbols, delete_range){
 	const completions = [];
 	for(let i=0; i<symbols.length; i++){
-		// TODO: parse symbol after `.` correct
 		const comp = new vscode.CompletionItem(symbols[i].full_name, symbols[i].kind);
 		comp.insertText = new vscode.SnippetString(symbols[i].signature + symbols[i].get_insert_text());
 		comp.detail = symbols[i].signature;
@@ -28,7 +28,9 @@ function activate(context) {
 	}
 
 	if(conf.get("update_index_on_change")){
-		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(update_symbol_index));
+		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((document) => {return update_symbol_index(document.document);}));
+	} else {
+		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((document) => {return update_first_time(document.document);}));
 	}
 
 	// TODO: maybe add more events and settings for custom additional autocompletion text
@@ -62,21 +64,16 @@ function activate(context) {
 			}
 
 			
-			var symbols = symbol_index[uri.toString()];
+			const symbols = symbol_index[uri.toString()];
 			// console.log("got symbols for current file");
 			// console.log(symbols);
 
 			return new Promise(
 				function(resolve, reject){
-					if(symbols === undefined){
-						// console.log("forced symbol update...");
-						update_symbol_index(vscode.window.activeTextEditor.document).then(
-							function(symbols_array){
-								resolve(create_completions(symbols_array, delete_range));			
-							}
-						);
-					} else {
+					if(symbols !== undefined){
 						resolve(create_completions(symbols, delete_range));
+					} else {
+						resolve(null);
 					}
 				}
 			);

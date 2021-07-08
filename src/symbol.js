@@ -328,14 +328,13 @@ function update_symbol_index(document){
     if(document === undefined || document.uri === undefined){
         return null;
     }
-    
+
 	const uri = document.uri;
 
     return new Promise(
         function(resolve, reject){
             FilePairFactory.create_file_pair_from_uri(uri).then(
                 function(file_pair){
-                    // console.log(file_pair);
                     update_symbol_index_from(file_pair.header_uri, file_pair.source_uri).then(
                         function(symbols){
                             resolve(symbols);
@@ -347,10 +346,39 @@ function update_symbol_index(document){
     );
 }
 
+function update_first_time(document){
+	if(document === undefined || document.uri === undefined){
+		return null;
+	}
+
+	const uri = document.uri;
+	// console.log("update first time??");
+
+	return new Promise(
+		function(resolve, reject){
+            FilePairFactory.create_file_pair_from_uri(uri).then(
+                function(file_pair){
+                    const symbols = symbol_index[file_pair.source_uri.toString()];
+                    if(symbols === undefined){
+                        // console.log("update first time...");
+                        update_symbol_index_from(file_pair.header_uri, file_pair.source_uri).then(
+                            function(symbols){
+                                resolve();
+                            }
+                        );
+                    }
+                    resolve();
+                }
+            );
+		}
+	);
+}
+
 
 module.exports = {
     MethodSymbol,
 	update_symbol_index,
+    update_first_time,
 	symbols_for,
     symbol_index
 }
