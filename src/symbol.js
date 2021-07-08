@@ -134,10 +134,15 @@ class Symbol {
 class BaseFunctionSymbol extends Symbol{
     constructor(symbol_obj, document, container_chain){
         super(symbol_obj, document, container_chain);
-        this.is_declaration = this.symbol_text.match(/;\s*?($|\/\/)/g);
-		this.is_deleted = this.symbol_text.match(/delete\s*?;($|\/\/)/g);
-		this.is_defaulted = this.symbol_text.match(/default\s*?;($|\/\/)/g);
-        this.is_pure_virtual = this.symbol_text.match(/0\s*?;($|\/\/)/g);
+        // console.log("symbol_text: > " + this.symbol_text + " <");
+        this.is_declaration = !!this.symbol_text.match(/;\s*?$/g);
+		this.is_deleted = !!this.symbol_text.match(/delete\s*?;$/g);
+		this.is_defaulted = !!this.symbol_text.match(/default\s*?;$/g);
+        this.is_pure_virtual = !!this.symbol_text.match(/0\s*?;$/g);
+        // console.log("is_declaration: " + this.is_declaration);
+        // console.log("is_deleted: " + this.is_deleted);
+        // console.log("is_declaration: " + this.is_defaulted);
+        // console.log("is_pure_virtual: " + this.is_pure_virtual);
     }
 
 	is_symbol_with_no_definition(){
