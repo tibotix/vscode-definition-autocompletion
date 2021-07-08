@@ -69,6 +69,10 @@ This extension contributes the following settings:
 ## Release Notes
 ----------------
 
+### 1.1.3
+
+  - fixed issues with definition detection in source files
+
 ### 1.1.2
 
   - detect more function attributes and specifiers correctly
