@@ -73,6 +73,7 @@ This extension contributes the following settings:
 ### 1.1.5
 
   - automatically index a not yet indexed file when switching to it, regardless of the `definition-autocompletion.update_index_on_change` option.
+  - added interval to update the symbol index periodically
 
 ### 1.1.4
 
