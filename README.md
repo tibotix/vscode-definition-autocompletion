@@ -48,6 +48,7 @@ This extension contributes the following settings:
 * `definition-autocompletion.trigger_character`: The character that triggers the completion suggestion on a new blank line.
 * `definition-autocompletion.update_index_on_save`: Wether to update the symbol index table when saving the current text document.
 * `definition-autocompletion.update_index_on_change`: Wether to update the symbol index table when changing the active text editor
+* `definition-autocompletion.update_index_interval` : The interval in seconds in which the symbol index table will update. Specify 0 to deactivate the interval.
 
 <br>
 

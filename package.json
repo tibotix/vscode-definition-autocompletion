@@ -50,6 +50,11 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Wether to update the symbol index table when changing the active text editor."
+				},
+				"definition-autocompletion.update_index_interval": {
+					"type": "number",
+					"default": 15,
+					"description": "The interval in seconds in which the symbol index table will update. Specify 0 to deactivate the interval."
 				}
 			}
 		}

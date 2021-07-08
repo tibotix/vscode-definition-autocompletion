@@ -86,7 +86,11 @@ function activate(context) {
 
 	context.subscriptions.push(provider);
 
-	// TODO: maybe set interval in which the symbol table should be updated
+	const update_interval = conf.get("update_index_interval");
+	if(update_interval !== 0){
+		setInterval(() => {update_symbol_index(vscode.window.activeTextEditor.document)}, update_interval*1000);
+	}
+	
 
 }
 
