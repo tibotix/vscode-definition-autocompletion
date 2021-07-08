@@ -325,6 +325,10 @@ function update_symbol_index_from(header_uri, source_uri){
 
 
 function update_symbol_index(document){
+    if(document === undefined){
+        return null;
+    }
+    
 	const uri = document.uri;
 
     return new Promise(

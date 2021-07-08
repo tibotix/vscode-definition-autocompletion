@@ -9,7 +9,6 @@ let conf = vscode.workspace.getConfiguration("definition-autocompletion");
 function create_completions(symbols, delete_range){
 	const completions = [];
 	for(let i=0; i<symbols.length; i++){
-		// TODO: support declarations where function name is not on last line
 		// TODO: parse symbol after `.` correct
 		const comp = new vscode.CompletionItem(symbols[i].full_name, symbols[i].kind);
 		comp.insertText = new vscode.SnippetString(symbols[i].signature + symbols[i].get_insert_text());
@@ -86,6 +85,8 @@ function activate(context) {
 	}, trigger_char);
 
 	context.subscriptions.push(provider);
+
+	// TODO: maybe set interval in which the symbol table should be updated
 
 }
 
