@@ -17,10 +17,13 @@ class FileFinder{
         this.base = "";
         this.max_results = 1;
         this.extensions = [];
+		this.workspace_folders = vscode.workspace.workspaceFolders;
     }
 
     match_base(){
-        this.base = "**/";
+		if(this.workspace_folders){
+			this.base = "**/";
+		}
         return this;
     }
 
@@ -40,7 +43,7 @@ class FileFinder{
     }
 
     generate_include_pattern(){
-        var include_pattern = this.base + this.file_name + ".{"
+        var include_pattern = this.base + this.file_name + ".{";
         for(let i=0; i!=this.extensions.length; ++i){
             include_pattern += this.extensions[i]+ ",";
         }
@@ -48,16 +51,15 @@ class FileFinder{
         return include_pattern;
     }
 
-	// TODO: maybe use RelativePattern
     find_files(){
         var include_pattern = this.generate_include_pattern();
 		const max_results = this.max_results;
+		const workspace_folders = this.workspace_folders;
 
 		return new Promise(
 			function(resolve, reject){
-				if(vscode.workspace.name === undefined){
+				if(workspace_folders === undefined){
 					glob(include_pattern, { matchBase: true}, function(err, files){
-						// console.log(files);
 						if(err){
 							reject("");
 						} else {
@@ -65,7 +67,8 @@ class FileFinder{
 						}
 					});
 				} else {
-					vscode.workspace.findFiles(include_pattern, "", max_results).then(
+					const root_path = workspace_folders[0];
+					vscode.workspace.findFiles(new vscode.RelativePattern(root_path, include_pattern), "", max_results).then(
 						function(file_uris){
 							resolve(file_uris);
 						}
