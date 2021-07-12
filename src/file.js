@@ -68,7 +68,12 @@ class FileFinder{
 					});
 				} else {
 					const root_path = workspace_folders[0];
-					vscode.workspace.findFiles(new vscode.RelativePattern(root_path, include_pattern), "", max_results).then(
+					// console.log(root_path);
+					// console.log(include_pattern);
+					// // const pattern = new vscode.RelativePattern(root_path, include_pattern);
+					//TODO: fix relative pattern
+					const pattern = include_pattern;
+					vscode.workspace.findFiles(pattern, "", max_results).then(
 						function(file_uris){
 							resolve(file_uris);
 						}
@@ -111,6 +116,8 @@ class FilePairFactory {
 								if(source_uri_array.length){
 									source_uri = source_uri_array[0];
 								}
+								// console.log(header_uri);
+								// console.log(source_uri);
 								const pair = new FilePair(header_uri, source_uri);
 								file_pairs[beginning] = pair;
 								resolve(pair);
