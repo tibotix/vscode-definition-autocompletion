@@ -57,6 +57,8 @@ This extension contributes the following settings:
 ---------------
 
 - nested return Types are not extended by the outer layer Type
+- functions inside namespaces are not correctly completed when auto completing outside of this namespace
+- currently only works with workspaces
 
 <br>
 
@@ -69,6 +71,10 @@ This extension contributes the following settings:
 
 ## Release Notes
 ----------------
+
+### 1.1.6
+
+  - fixed issues with workspace folder detection
 
 ### 1.1.5
 
