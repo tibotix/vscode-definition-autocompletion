@@ -117,8 +117,8 @@ class FilePairFactory {
 								if(source_uri_array.length){
 									source_uri = source_uri_array[0];
 								}
-								console.log(header_uri);
-								console.log(source_uri);
+								// console.log(header_uri);
+								// console.log(source_uri);
 								const pair = new FilePair(header_uri, source_uri);
 								file_pairs[beginning] = pair;
 								resolve(pair);

@@ -72,9 +72,13 @@ This extension contributes the following settings:
 ## Release Notes
 ----------------
 
-### 1.1.7
+### 1.1.8
 
   - fixed issues with folder detection outside workspaces
+
+### 1.1.7
+
+  - some improvements in signature detection
 
 ### 1.1.6
 

@@ -299,11 +299,11 @@ function update_symbol_index_from(header_uri, source_uri){
                                                 function(parsed_header_symbols){
                                                     SymbolParser.parse_symbols(source_document, source_symbols).then(
                                                         function(parsed_source_symbols){
-                                                            console.log("results: ");
-                                                            console.log(parsed_header_symbols.declarations);
-                                                            console.log(parsed_source_symbols.definitions);
+                                                            // console.log("results: ");
+                                                            // console.log(parsed_header_symbols.declarations);
+                                                            // console.log(parsed_source_symbols.definitions);
                                                             const unique_symbols = filter_unique_header_symbols(parsed_header_symbols.declarations, parsed_source_symbols.definitions);
-                                                            console.log(unique_symbols);
+                                                            // console.log(unique_symbols);
                                                             symbol_index[source_uri.toString()] = unique_symbols;
                                                             // console.log("updated symbol index!");
                                                             resolve(unique_symbols);
