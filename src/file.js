@@ -1,4 +1,3 @@
-const { glob } = require('glob');
 const vscode = require('vscode');
 
 var file_pairs = new Object();
@@ -59,13 +58,15 @@ class FileFinder{
 		return new Promise(
 			function(resolve, reject){
 				if(workspace_folders === undefined){
-					glob(include_pattern, { matchBase: true}, function(err, files){
-						if(err){
-							reject("");
-						} else {
-							resolve(files.map(function(path){return vscode.Uri.file(path);}));
-						}
-					});
+					// glob(include_pattern, { matchBase: true}, function(err, files){
+					// 	if(err){
+					// 		reject("");
+					// 	} else {
+					// 		resolve(files.map(function(path){return vscode.Uri.file(path);}));
+					// 	}
+					// });
+					// TODO: implement without workspace
+					resolve([]);
 				} else {
 					const root_path = workspace_folders[0];
 					// console.log(root_path);
@@ -116,8 +117,8 @@ class FilePairFactory {
 								if(source_uri_array.length){
 									source_uri = source_uri_array[0];
 								}
-								// console.log(header_uri);
-								// console.log(source_uri);
+								console.log(header_uri);
+								console.log(source_uri);
 								const pair = new FilePair(header_uri, source_uri);
 								file_pairs[beginning] = pair;
 								resolve(pair);

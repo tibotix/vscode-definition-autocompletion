@@ -72,6 +72,10 @@ This extension contributes the following settings:
 ## Release Notes
 ----------------
 
+### 1.1.7
+
+  - fixed issues with folder detection outside workspaces
+
 ### 1.1.6
 
   - fixed issues with workspace folder detection
