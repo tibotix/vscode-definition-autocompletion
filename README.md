@@ -5,7 +5,6 @@
 <br>
 
 ## Features
------------
 
 To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` file.
 
@@ -25,7 +24,6 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
  <br>
 
 ## Examples:
------------
 
 ![Member function completion demo](images/member_function_completion_demo.gif)
 
@@ -35,14 +33,12 @@ To trigger the autocompletion, type a `.` on a new blank line in your `.c/.cpp` 
 <br>
 
 ## Requirements
----------------
 
 - C/C++ Extension
 
 <br>
 
 ## Extension Settings
----------------------
 
 This extension contributes the following settings:
 
@@ -54,7 +50,6 @@ This extension contributes the following settings:
 <br>
 
 ## Known Issues
----------------
 
 - nested return Types are not extended by the outer layer Type
 - functions inside namespaces are not correctly completed when auto completing outside of this namespace
@@ -63,14 +58,12 @@ This extension contributes the following settings:
 <br>
 
 ## Future Plans
----------------
 
 - fix issues
 
 <br>
 
 ## Release Notes
-----------------
 
 ### 1.1.8
 
