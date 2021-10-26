@@ -13,7 +13,13 @@
 		"Programming Languages",
 		"Other"
 	],
-	"keywords": ["autocompletion", "c", "c++", "definition", "declaration"],
+	"keywords": [
+		"autocompletion",
+		"c",
+		"c++",
+		"definition",
+		"declaration"
+	],
 	"icon": "images/icon.png",
 	"galleryBanner": {
 		"theme": "dark",
@@ -33,7 +39,7 @@
 		"onLanguage:cpp"
 	],
 	"contributes": {
-		"configuration":{
+		"configuration": {
 			"title": "C/C++ Definition Autocompletion",
 			"properties": {
 				"definition-autocompletion.trigger_character": {
@@ -55,6 +61,22 @@
 					"type": "number",
 					"default": 20,
 					"description": "The interval in seconds in which the symbol index table will update. Specify 0 to deactivate the interval."
+				},
+				"definition-autocompletion.source_file_extension_patterns": {
+					"type": "array",
+					"default": [
+						"c",
+						"cpp"
+					],
+					"description": "The source file extension patterns as an array."
+				},
+				"definition-autocompletion.header_file_extension_patterns": {
+					"type": "array",
+					"default": [
+						"h",
+						"hpp"
+					],
+					"description": "The header file extension patterns as an array."
 				}
 			}
 		}
