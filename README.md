@@ -54,7 +54,6 @@ This extension contributes the following settings:
 ## Known Issues
 
 - nested return Types are not extended by the outer layer Type
-- functions inside namespaces are not correctly completed when auto completing outside of this namespace
 - currently only works with workspaces
 
 <br>
@@ -67,6 +66,12 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+
+### 1.2.0
+
+  - add namespace support
+  - add nested template declaration support
+  - fix configuration options to specify the header/source file patterns
 
 ### 1.1.9
 
