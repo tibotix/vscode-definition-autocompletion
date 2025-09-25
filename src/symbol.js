@@ -11,23 +11,25 @@ class SymbolFactory {
         this.document = document;
     }
 
-    create_symbol_from_kind(symbol_obj, container_chain){
+    create_symbol_from_kind(symbol_obj, container_chain, template_declarations){
         // limitation: functions with a space between `<function_name>` and `()` are false detected as variables
         switch (symbol_obj.kind) {
-            case 11:
-                return new FunctionSymbol(symbol_obj, this.document, container_chain);
-            case 9:
-                return new EnumSymbol(symbol_obj, this.document, container_chain);
-            case 4:
-                return new ClassSymbol(symbol_obj, this.document, container_chain);
-            case 5:
-                return new MethodSymbol(symbol_obj, this.document, container_chain);
-            case 22:
-                return new StructSymbol(symbol_obj, this.document, container_chain);
-            case 24:
-                return new MethodSymbol(symbol_obj, this.document, container_chain);
+            case vscode.SymbolKind.Function:
+                return new FunctionSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Enum:
+                return new EnumSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Class:
+                return new ClassSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Method:
+                return new MethodSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Struct:
+                return new StructSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Operator:
+                return new MethodSymbol(symbol_obj, this.document, container_chain, template_declarations);
+            case vscode.SymbolKind.Namespace:
+                return new NamespaceSymbol(symbol_obj, this.document, container_chain, template_declarations)
             default:
-                return new Symbol(symbol_obj, this.document, container_chain);
+                return new Symbol(symbol_obj, this.document, container_chain, template_declarations);
         }
     }
 };
@@ -51,11 +53,19 @@ const ending_specifiers = ["override"];
 
 class SignatureFactory {
     // TODO: add support for nested return types that are not accessible directly. maybe make additional return type chain...
-    static create_signature(symbol_obj, symbol_text, container_chain, eol){
+    static create_signature(symbol_obj, symbol_text, container_chain, template_declaration, template_declarations, eol){
         const rel_text = new RelativeTextEditor(symbol_text, symbol_obj.range.start.with({character: 0}), eol);
         rel_text.insert(symbol_obj.selectionRange.start, container_chain);
         let signature = rel_text.get_text();
         signature = signature.substring(0, signature.length-1);
+
+        var m = signature.match("^\\s*template\\s*<(.+)>\\s*");
+        if (m && m[1])
+        {
+            signature = signature.replace(m[0], template_declaration + "\n");
+        }
+
+        signature = template_declarations + (template_declarations ? "\n" : "") + signature;
         return SignatureFactory.clear_keywords(signature).trim();
     }
 
@@ -83,16 +93,29 @@ class SignatureFactory {
 };
 
 class Symbol {
-
-
-    constructor(symbol_obj, document, container_chain){
+    constructor(symbol_obj, document, container_chain, template_declarations){
 		// console.log("symbol_obj: ");
 		// console.log(symbol_obj);
         const eol = get_eol(document);
         
         const relative_start_position = symbol_obj.range.start.with({character: 0});
         this.symbol_text = document.getText(new vscode.Range(relative_start_position, symbol_obj.range.end));
-        this.signature = SignatureFactory.create_signature(symbol_obj, this.symbol_text, container_chain, eol);
+
+        this.template_declaration = ""
+        var m = this.symbol_text.match("^\\s*template\\s*<(.+)>\\s*");
+        if (m && m[1])
+        {
+            this.template_declaration = "template <" + m[1].split(",").map(function (decl) {
+                var mt = decl.match("([^=]+)=.*");
+                if (mt && mt[1])
+                    return mt[1].trim();
+                else
+                    return decl.trim();
+            }).join(", ") + ">";
+        }
+
+
+        this.signature = SignatureFactory.create_signature(symbol_obj, this.symbol_text, container_chain, this.template_declaration, template_declarations, eol);
         // console.log("container chain: " + container_chain);
         // console.log("symbol_text: > " + this.symbol_text + " <");
         // console.log("signature: > " + this.signature + " <");
@@ -122,11 +145,15 @@ class Symbol {
         return " {\n\t$0\n}";
     }
 
+    get_template_declaration(){
+        return this.template_declaration;
+    }
+
 };
 
 class BaseFunctionSymbol extends Symbol{
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
         // console.log("symbol_text: > " + this.symbol_text + " <");
         this.is_declaration = !!this.symbol_text.match(/;\s*?$/g);
 		this.is_deleted = !!this.symbol_text.match(/delete\s*?;$/g);
@@ -144,14 +171,14 @@ class BaseFunctionSymbol extends Symbol{
 }
 
 class FunctionSymbol extends BaseFunctionSymbol{ // without class
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
     }
 };
 
 class MethodSymbol extends BaseFunctionSymbol{ // with class
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
         this.is_constructor_symbol = this.is_constructor();
     }
 
@@ -173,8 +200,8 @@ class MethodSymbol extends BaseFunctionSymbol{ // with class
 };
 
 class StructSymbol extends Symbol{
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
     }
 
     is_container(){
@@ -187,8 +214,8 @@ class StructSymbol extends Symbol{
 };
 
 class ClassSymbol extends Symbol{
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
     }
 
     is_container(){
@@ -201,8 +228,8 @@ class ClassSymbol extends Symbol{
 };
 
 class EnumSymbol extends Symbol{
-    constructor(symbol_obj, document, container_chain){
-        super(symbol_obj, document, container_chain);
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
     }
 
     is_container(){
@@ -214,6 +241,20 @@ class EnumSymbol extends Symbol{
     }
 };
 
+class NamespaceSymbol extends Symbol{
+    constructor(symbol_obj, document, container_chain, template_declarations){
+        super(symbol_obj, document, container_chain, template_declarations);
+    }
+
+    is_container(){
+        return true;
+    }
+
+    get_container_specifier(){
+        return this.name;
+    }
+}
+
 
 class SymbolParser{
     static parse_symbols(document, root_symbols){
@@ -223,22 +264,23 @@ class SymbolParser{
                 let definition_symbols = [];
                 const symbol_creator = new SymbolFactory(document);
 
-                const parse_symbol_iteration = (symbol_array, container_chain) => {
+                const parse_symbol_iteration = (symbol_array, container_chain, template_declarations) => {
                     // console.log(container_chain);
                     // console.log(symbol_array);
                     for(let i=0; i!=symbol_array.length; ++i){
-                        let symbol = symbol_creator.create_symbol_from_kind(symbol_array[i], container_chain);
+                        let symbol = symbol_creator.create_symbol_from_kind(symbol_array[i], container_chain, template_declarations);
                         // console.log(symbol);
                         if(symbol.is_symbol_with_no_definition()){
                             declaration_symbols.push(symbol);
                         } else {
                             definition_symbols.push(symbol);
                         }
-                        parse_symbol_iteration(symbol_array[i].children, ContainerChain.add_container(container_chain, symbol.get_container_specifier()));
+                        var template_declarations_ = template_declarations + (template_declarations ? "\n" : "") + symbol.get_template_declaration()
+                        parse_symbol_iteration(symbol_array[i].children, ContainerChain.add_container(container_chain, symbol.get_container_specifier()), template_declarations_);
                     }
                 }
 
-                parse_symbol_iteration(root_symbols, "");
+                parse_symbol_iteration(root_symbols, "", "");
                 resolve({declarations: declaration_symbols, definitions: definition_symbols});
             }
         );
