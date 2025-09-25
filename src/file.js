@@ -2,8 +2,8 @@ const vscode = require('vscode');
 
 let conf = vscode.workspace.getConfiguration("definition-autocompletion");
 
-let header_file_regex = ".*("; + conf.get("header_file_extension_patterns").join("$|") + "$)";
-let source_file_regex = ".*("; + conf.get("source_file_extension_patterns").join("$|") + "$)";
+let header_file_regex = ".*(" + conf.get("header_file_extension_patterns").join("|") + ")";
+let source_file_regex = ".*(" + conf.get("source_file_extension_patterns").join("|") + ")";
 
 var file_pairs = new Object();
 
@@ -117,7 +117,7 @@ class FilePairFactory {
 						if (header_uri_array.length) {
 							header_uri = header_uri_array[0];
 						}
-						new FileFinder().match_base().match_file_name(file_name).match_extensions(conf.get("header_file_extension_patterns")).find_files().then(
+						new FileFinder().match_base().match_file_name(file_name).match_extensions(conf.get("source_file_extension_patterns")).find_files().then(
 							function (source_uri_array) {
 								if (source_uri_array.length) {
 									source_uri = source_uri_array[0];
