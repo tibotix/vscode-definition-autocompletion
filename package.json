@@ -2,7 +2,7 @@
 	"name": "definition-autocompletion",
 	"displayName": "C/C++ Definition Autocompletion",
 	"description": "Autocomplete C/C++ function definitions from their respective declarations on the fly. Supporting class member functions, template functions and many more.",
-	"version": "1.1.8",
+	"version": "1.1.9",
 	"publisher": "tibotix",
 	"engines": {
 		"vscode": "^1.57.0"
